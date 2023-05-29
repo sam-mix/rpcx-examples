@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"log"
-	"time"
 
 	example "github.com/rpcxio/rpcx-examples"
 	"github.com/smallnest/rpcx/client"
@@ -17,7 +16,12 @@ var (
 
 func main() {
 	flag.Parse()
+	for {
+		process()
+	}
+}
 
+func process() {
 	d, _ := client.NewMultipleServersDiscovery([]*client.KVPair{{Key: *addr1}, {Key: *addr2}})
 	xclient := client.NewXClient("Arith", client.Failover, client.RoundRobin, d, client.DefaultOption)
 	defer xclient.Close()
@@ -27,15 +31,16 @@ func main() {
 		B: 20,
 	}
 
-	for {
-		reply := &example.Reply{}
-		err := xclient.Broadcast(context.Background(), "Mul", args, reply)
-		if err != nil {
-			log.Fatalf("failed to call: %v", err)
-		}
-
-		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
-		time.Sleep(1e9)
+	// for {
+	reply := &example.Reply{}
+	err := xclient.Broadcast(context.Background(), "Mul", args, reply)
+	if err != nil {
+		log.Fatalf("failed to call: %v", err)
 	}
-
+	if reply.C == 200 {
+		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
+	}
+	// break
+	// time.Sleep(1e9)
+	// }
 }

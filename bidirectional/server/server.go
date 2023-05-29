@@ -23,6 +23,16 @@ var connected = false
 type Arith int
 
 func (t *Arith) Mul(ctx context.Context, args *example.Args, reply *example.Reply) error {
+
+	clientConn = ctx.Value(server.RemoteConnContextKey).(net.Conn)
+	time.Sleep(10 * time.Second)
+	reply.C = args.A * args.B
+	connected = true
+	return nil
+}
+
+func (t *Arith) Mul2(ctx context.Context, args *example.Args, reply *example.Reply) error {
+
 	clientConn = ctx.Value(server.RemoteConnContextKey).(net.Conn)
 	reply.C = args.A * args.B
 	connected = true

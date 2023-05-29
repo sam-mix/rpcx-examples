@@ -25,7 +25,7 @@ func main() {
 
 func auth(ctx context.Context, req *protocol.Message, token string) error {
 
-	if token == "bearer tGzv3JOkF0XG5Qx2TlKWIA" {
+	if token == "bearer abcdefg1234567" {
 		return nil
 	}
 

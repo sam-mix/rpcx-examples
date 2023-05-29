@@ -23,21 +23,42 @@ func main() {
 	d, _ := client.NewPeer2PeerDiscovery("tcp@"+*addr, "")
 	xclient := client.NewBidirectionalXClient("Arith", client.Failtry, client.RandomSelect, d, client.DefaultOption, ch)
 	defer xclient.Close()
+	go func() {
+		args := &example.Args{
+			A: 10,
+			B: 20,
+		}
 
-	args := &example.Args{
-		A: 10,
-		B: 20,
-	}
+		reply := &example.Reply{}
+		err := xclient.Call(context.Background(), "Mul", args, reply)
+		if err != nil {
+			log.Fatalf("failed to call: %v", err)
+		}
 
-	reply := &example.Reply{}
-	err := xclient.Call(context.Background(), "Mul", args, reply)
-	if err != nil {
-		log.Fatalf("failed to call: %v", err)
-	}
+		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
 
-	log.Printf("%d * %d = %d", args.A, args.B, reply.C)
+		for msg := range ch {
+			fmt.Printf("receive msg from server 1: %s\n", msg.Payload)
+		}
+	}()
+	go func() {
+		args := &example.Args{
+			A: 10,
+			B: 20,
+		}
 
-	for msg := range ch {
-		fmt.Printf("receive msg from server: %s\n", msg.Payload)
-	}
+		reply := &example.Reply{}
+		err := xclient.Call(context.Background(), "Mul2", args, reply)
+		if err != nil {
+			log.Fatalf("failed to call: %v", err)
+		}
+
+		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
+
+		for msg := range ch {
+			fmt.Printf("receive msg from server 2: %s\n", msg.Payload)
+		}
+	}()
+
+	select {}
 }

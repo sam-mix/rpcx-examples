@@ -42,7 +42,6 @@ func main() {
 
 	ch := make(chan *protocol.Message)
 	c.RegisterServerMessageChan(ch)
-
 	for msg := range ch {
 		fmt.Printf("receive msg from server: %s\n", msg.Payload)
 	}

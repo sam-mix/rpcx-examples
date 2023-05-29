@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	example "github.com/rpcxio/rpcx-examples"
 	"github.com/smallnest/rpcx/client"
@@ -34,8 +35,9 @@ func (t *Arith) Mul(ctx context.Context, args example.Args, reply *example.Reply
 }
 
 func (t *Arith) Say(ctx context.Context, args string, reply *string) error {
-
-	return errors.New("error from Say")
+	fmt.Println("Say Hello")
+	return nil
+	// return errors.New("error from Say")
 }
 
 func main() {
