@@ -18,7 +18,7 @@ var (
 func main() {
 	flag.Parse()
 
-	ch := make(chan *protocol.Message)
+	ch := make(chan *protocol.Message, 10000)
 
 	d, _ := client.NewPeer2PeerDiscovery("tcp@"+*addr, "")
 	xclient := client.NewBidirectionalXClient("Arith", client.Failtry, client.RandomSelect, d, client.DefaultOption, ch)
@@ -36,10 +36,6 @@ func main() {
 		}
 
 		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
-
-		for msg := range ch {
-			fmt.Printf("receive msg from server 1: %s\n", msg.Payload)
-		}
 	}()
 	go func() {
 		args := &example.Args{
@@ -55,10 +51,11 @@ func main() {
 
 		log.Printf("%d * %d = %d", args.A, args.B, reply.C)
 
-		for msg := range ch {
-			fmt.Printf("receive msg from server 2: %s\n", msg.Payload)
-		}
 	}()
-
-	select {}
+	count := 1
+	for msg := range ch {
+		fmt.Printf("receive msg from server 2: %s\n", msg.Payload)
+		count++
+		fmt.Println("count:", count)
+	}
 }

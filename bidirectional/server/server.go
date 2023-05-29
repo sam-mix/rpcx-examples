@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
+	"strconv"
 	"time"
 
 	example "github.com/rpcxio/rpcx-examples"
@@ -25,7 +26,7 @@ type Arith int
 func (t *Arith) Mul(ctx context.Context, args *example.Args, reply *example.Reply) error {
 
 	clientConn = ctx.Value(server.RemoteConnContextKey).(net.Conn)
-	time.Sleep(10 * time.Second)
+	// time.Sleep(10 * time.Second)
 	reply.C = args.A * args.B
 	connected = true
 	return nil
@@ -51,18 +52,23 @@ func main() {
 	go s.Serve("tcp", *addr)
 
 	for !connected {
-		time.Sleep(time.Second)
+		time.Sleep(1 * time.Second)
 	}
 
 	fmt.Printf("start to send messages to %s\n", clientConn.RemoteAddr().String())
-	for {
+	for i := 1; i < 100000; i++ {
 		if clientConn != nil {
-			err := s.SendMessage(clientConn, "test_service_path", "test_service_method", nil, []byte("abcde"))
-			if err != nil {
-				fmt.Printf("failed to send messsage to %s: %v\n", clientConn.RemoteAddr().String(), err)
-				clientConn = nil
-			}
+			go func(i int) {
+				// err := s.SendMessage(clientConn, "test_service_path", "test_service_method", nil, []byte("abcde"))
+				err := s.SendMessage(clientConn, "test_service_path", "test_service_method", nil, []byte(strconv.Itoa(i)))
+				if err != nil {
+					fmt.Printf("failed to send messsage to %s: %v\n", clientConn.RemoteAddr().String(), err)
+					clientConn = nil
+				}
+			}(i)
+
 		}
-		time.Sleep(time.Second)
+		// time.Sleep(time.Second)
 	}
+	select {}
 }
